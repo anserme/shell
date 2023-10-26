@@ -76,10 +76,10 @@ fi
 install_base() {
     if [[ x"${release}" == x"centos" ]]; then
         yum install epel-release -y
-        yum install wget curl unzip tar crontabs socat -y
+        yum install wget curl unzip tar crontabs socat jq -y
     else
         apt update -y
-        apt install wget curl unzip tar cron socat -y
+        apt install wget curl unzip tar cron socat jq -y
     fi
 }
 
