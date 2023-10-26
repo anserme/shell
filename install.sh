@@ -252,7 +252,7 @@ init_panel() {
     curl_response=$(curl -s "${api_url}/mod_mu/nodes/${node_id}/info?key=${token}")
 
     # 提取JSON中的host值
-    host_value=$(echo "${curl_response}" | jq -r '.data.host')
+    host_value=$(echo "${curl_response}" | jq -r '.data.custom_config.host')
 
     # 替换配置文件中的"node1.test.com"为提取的host值
     sed -i "s/node1.test.com/${host_value}/g" /etc/XrayR/config.yml
