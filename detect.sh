@@ -32,26 +32,26 @@ install() {
 # Check function
 check() {
     echo "正在执行TCPing测试惹..."
-    tcping_output=$(tcping itdog.cn 80 -c 10 | sed -r "s/\x1B\[[0-9;]*[mK]//g")
+    tcping_output=$(tcping itdog.cn 80 -c 10 | sed -r "s/\x1B\[[0-9;]*[mK]//g" | tr -d '\r')
+
+    # Display raw output for debugging
     echo "$tcping_output"
 
-    # Extract successful probes count
-    successful_probes=$(echo "$tcping_output" | grep -Eo 'successful probes:\s+[0-9]+' | tr -s ' ' | awk '{print $3}')
+    # Extract successful probes count, ensure it's a clean integer
+    successful_probes=$(echo "$tcping_output" | grep -Eo 'successful probes:\s+[0-9]+' | awk '{print $3}' | tr -d '[:space:]')
 
     # Debugging output
-    echo "成功探测数为：${successful_probes:-未捕获}"
+    echo "成功探测数为：$successful_probes"
 
-    # Handle empty or missing result
-    if [ -z "$successful_probes" ]; then
-        echo "未能捕获成功探测数，假设为 0。"
-        successful_probes=0
-    fi
-
-    if [ "$successful_probes" -eq 0 ]; then
+    # Validate and handle successful_probes
+    if [[ "$successful_probes" =~ ^[0-9]+$ ]] && [ "$successful_probes" -eq 0 ]; then
         echo "检测到所有探测失败，执行change函数惹..."
         change
-    else
+    elif [[ "$successful_probes" =~ ^[0-9]+$ ]]; then
         echo "所有探测成功，无需执行change函数。"
+    else
+        echo "解析探测结果失败，默认处理为探测失败。执行change函数惹..."
+        change
     fi
 }
 
