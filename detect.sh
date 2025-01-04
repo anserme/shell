@@ -37,21 +37,12 @@ check() {
     # Display raw output for debugging
     echo "$tcping_output"
 
-    # Extract successful probes count with stricter match
-    successful_probes=$(echo "$tcping_output" | grep -Eo '^successful probes:\s+[0-9]+' | awk '{print $3}' | tr -d '\n\r ')
-
-    # Debugging output
-    echo "成功探测数为：$successful_probes"
-
-    # Validate and handle successful_probes
-    if [[ "$successful_probes" =~ ^[0-9]+$ ]] && [ "$successful_probes" -eq 0 ]; then
-        echo "检测到所有探测失败，执行change函数惹..."
+    # Check for "0 received"
+    if echo "$tcping_output" | grep -q '0 received'; then
+        echo "检测到 0 received，执行change函数惹..."
         change
-    elif [[ "$successful_probes" =~ ^[0-9]+$ ]]; then
-        echo "所有探测成功，无需执行change函数。"
     else
-        echo "解析探测结果失败，默认处理为探测失败。执行change函数惹..."
-        change
+        echo "探测成功，无需执行change函数。"
     fi
 }
 
