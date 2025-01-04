@@ -37,8 +37,14 @@ check() {
     # Display raw output for debugging
     echo "$tcping_output"
 
-    # Check for exact match of "0 received"
-    if echo "$tcping_output" | grep -qE '^.*\| 0 received, .*packet loss$'; then
+    # Extract the "received" count
+    received_count=$(echo "$tcping_output" | grep -Eo '[0-9]+ received' | awk '{print $1}')
+
+    # Debugging output
+    echo "接收包数为：$received_count"
+
+    # Validate and decide based on received count
+    if [ "$received_count" -eq 0 ]; then
         echo "检测到 0 received，执行change函数惹..."
         change
     else
