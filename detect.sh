@@ -9,40 +9,43 @@ if [ "$(id -u)" -ne 0 ]; then
     exit 1
 fi
 
-# Install function: installs required packages, sets up cron job, and configures URL
+# Install function
 install() {
     echo "开始安装相关软件..."
-    # Update and install packages
     apt update && apt install -y wget curl cron tcping
 
-    # Download and install tcping
     wget https://github.com/pouriyajamshidi/tcping/releases/latest/download/tcping_amd64.deb -O /tmp/tcping.deb
     apt install -y /tmp/tcping.deb
 
-    # Prompt user for URL
     read -p "请输入更换IP的URL（例如：https://example.com/vdschangeip.php?utoken=xxxx&htoken=xxxx）： " change_url
     echo "URL配置为：$change_url"
-    
-    # Save URL to configuration file
     echo "CHANGE_URL=\"$change_url\"" > "$CONFIG_FILE"
-    chmod 600 "$CONFIG_FILE"  # Restrict permissions
+    chmod 600 "$CONFIG_FILE"
 
-    # Add cron job to execute check function every 5 minutes
     script_path=$(realpath "$0")
     cron_job="*/5 * * * * $script_path check"
     (crontab -l 2>/dev/null | grep -v "$script_path check"; echo "$cron_job") | crontab -
 
-    echo "安装完成惹！当前脚本的check函数已配置为每5分钟执行一次。配置文件存储在：$CONFIG_FILE"
+    echo "安装完成惹！配置文件存储在：$CONFIG_FILE"
 }
 
-# Check function: executes tcping and processes results
+# Check function
 check() {
     echo "正在执行TCPing测试惹..."
     tcping_output=$(tcping itdog.cn 80 -c 10)
     echo "$tcping_output"
 
     # Extract successful probes count
-    successful_probes=$(echo "$tcping_output" | grep -oP 'successful probes:\s+\K\d+')
+    successful_probes=$(echo "$tcping_output" | grep -Eo 'successful probes:\s+[0-9]+' | awk '{print $3}')
+
+    # Debugging output
+    echo "成功探测数为：${successful_probes:-未捕获}"
+
+    # Handle empty or missing result
+    if [ -z "$successful_probes" ]; then
+        echo "未能捕获成功探测数，假设为 0。"
+        successful_probes=0
+    fi
 
     if [ "$successful_probes" -eq 0 ]; then
         echo "检测到所有探测失败，执行change函数惹..."
@@ -52,10 +55,9 @@ check() {
     fi
 }
 
-# Change function: executes curl to change IP
+# Change function
 change() {
     if [ -f "$CONFIG_FILE" ]; then
-        # Load URL from config file
         source "$CONFIG_FILE"
         echo "正在执行IP更换请求惹，目标URL为：$CHANGE_URL"
         curl "$CHANGE_URL"
@@ -65,7 +67,7 @@ change() {
     fi
 }
 
-# Main logic to call functions based on input
+# Main logic
 case "$1" in
     install)
         install
