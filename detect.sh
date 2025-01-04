@@ -37,8 +37,8 @@ check() {
     # Display raw output for debugging
     echo "$tcping_output"
 
-    # Extract successful probes count, ensure it's a clean integer
-    successful_probes=$(echo "$tcping_output" | grep -Eo 'successful probes:\s+[0-9]+' | awk '{print $3}' | tr -d '[:space:]')
+    # Extract successful probes count
+    successful_probes=$(echo "$tcping_output" | grep -Eo 'successful probes:\s+[0-9]+' | awk '{print $3}' | tr -d '\n\r ')
 
     # Debugging output
     echo "成功探测数为：$successful_probes"
