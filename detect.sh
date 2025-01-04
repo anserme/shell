@@ -32,11 +32,11 @@ install() {
 # Check function
 check() {
     echo "正在执行TCPing测试惹..."
-    tcping_output=$(tcping itdog.cn 80 -c 10)
+    tcping_output=$(tcping itdog.cn 80 -c 10 | sed -r "s/\x1B\[[0-9;]*[mK]//g")
     echo "$tcping_output"
 
     # Extract successful probes count
-    successful_probes=$(echo "$tcping_output" | grep -Eo 'successful probes:\s+[0-9]+' | awk '{print $3}')
+    successful_probes=$(echo "$tcping_output" | grep -Eo 'successful probes:\s+[0-9]+' | tr -s ' ' | awk '{print $3}')
 
     # Debugging output
     echo "成功探测数为：${successful_probes:-未捕获}"
