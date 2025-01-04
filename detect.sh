@@ -37,8 +37,8 @@ check() {
     # Display raw output for debugging
     echo "$tcping_output"
 
-    # Check for "0 received"
-    if echo "$tcping_output" | grep -q '0 received'; then
+    # Check for exact match of "0 received"
+    if echo "$tcping_output" | grep -qE '^.*\| 0 received, .*packet loss$'; then
         echo "检测到 0 received，执行change函数惹..."
         change
     else
