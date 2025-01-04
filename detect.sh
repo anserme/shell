@@ -45,7 +45,7 @@ check() {
 
     # Validate and decide based on received count
     if [ "$received_count" -eq 0 ]; then
-        echo "检测到 0 received，执行change函数惹..."
+        echo "检测到被墙，执行change函数惹..."
         change
     else
         echo "探测成功，无需执行change函数。"
