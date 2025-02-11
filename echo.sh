@@ -142,6 +142,10 @@ EOF
         fi
     fi
     systemctl daemon-reload
+    if [ ! -x "/etc/xiandan/ehco/ehco" ];then
+        Install_ct
+        mkdir /etc/xiandan/ehco/$localPort/
+    fi
     service xiandan${2}xiandan start
     echo "已设置开机自启动！"
     systemctl enable xiandan${2}xiandan
